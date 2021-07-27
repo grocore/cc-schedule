@@ -29,7 +29,6 @@ try:
     engine = db.create_engine(engine_stmt, echo=True)
     logging.info('Trying to connect MSSQL')
     inspector = inspect(engine)
-    print('1')
     for table_name in inspector.get_table_names():
         for column in inspector.get_columns(table_name):
             print("Column: %s" % column['name'])

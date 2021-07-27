@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 sqlalchemy = "==1.4.20"
 pyodbc = "==4.0.31"
+flask-sqlalchemy = "==2.5.1"
 
 [dev-packages]
 flake8 = "*"
