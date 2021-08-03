@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+  <table class="table table-hover">
+    <thead>
+      <tr bgcolor="#faa83b;">
+        <th scope="col">Username</th>
+        <th scope="col">Start</th>
+        <th scope="col">End </th>
+      </tr>
+    </thead>
+    <tbody class="table">
+      
+      {% for record in records %}
+      <tr>
+        <th scope="row"><a href="#"> {{ user_name }} </th>
+        <td>{{ record.start }}</td>
+        <td>{{ record.end }}</td>
+      </tr>
+      {% endfor %}
+
+    </tbody>
+  </table>
+
+  <a class="btn btn-outline-success" href="#">Add</a>
+
+{% endblock content %}
+
