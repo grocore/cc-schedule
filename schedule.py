@@ -4,7 +4,8 @@ SERVER = 'localhost'
 DATABASE = 'oktell_settings'
 DRIVER = 'ODBC+DRIVER+17+for+SQL+Server'
 
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, request
+from flask.helpers import url_for
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 
@@ -41,11 +42,21 @@ class Schedule(db.Model):
 def homepage():
     return '<h1>Hi</h1>'
 
-@app.route("/list/<user_id>")
+
+@app.route("/list/<user_id>", methods=['GET', 'POST'])
 def list(user_id):
+    if request.method == 'POST':
+        record = Schedule.query.get(record_id)
+        record.status = 2
+        db.session.commit()
     user = db.session.query(oktell_users).filter_by(ID=user_id).first()
     records = Schedule.query.all()
-    return render_template('schedule.html', records=records, user_name=user.Name)
+    return render_template('schedule2.html', records=records, user_name=user.Name)
+
+@app.route("/deactivate/<record_id>")
+def deactivate(record_id):
+    
+    return redirect(url_for('list'))
 
 @app.route("/schedule/<user_id>", methods=['GET'])
 def user_page(user_id):
