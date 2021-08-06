@@ -13,18 +13,28 @@
           </tr>
         </thead>
         <tbody>
-          {% for record in records %}        
-          <tr>
-            <th scope="row">{{ user_name }}</th>
-            <td>{{ record.start }}</td>
-            <td>{{ record.end }}</td>
-            <td>
-              <form method="POST">
-                <input type="submit" name="deactivate" value="Удалить" name="Hello">
-              </form>
-              
-            </td>
-          </tr>
+          {% for record in records %}
+          
+            {% if record.status == 1 %}
+              <tr class="table-secondary">
+            {% elif record.status == 2 %}
+              <tr class="table-success">
+            {% elif record.status == 3 %}
+              <tr class="table-secondary">
+            {% elif record.status == 4 %}
+              <tr class="table-secondary">
+            {% endif %}
+
+              <th scope="row">{{ user_name }}</th>
+              <td>{{ record.start }}</td>
+              <td>{{ record.end }}</td>
+              <td>
+                <form method="POST">
+                  <input type="hidden" name="record_id" value='{{ record.id }}'>
+                  <input type="submit" name="deactivate" value="Отменить" >
+                </form>               
+              </td>
+            </tr>
           {% endfor %}
         </tbody>
       </table>

@@ -46,8 +46,11 @@ def homepage():
 @app.route("/list/<user_id>", methods=['GET', 'POST'])
 def list(user_id):
     if request.method == 'POST':
+        record_id = request.values['record_id']
         record = Schedule.query.get(record_id)
-        record.status = 2
+        record.status = 3
+        print(request.date)
+        print(request.get_data())
         db.session.commit()
     user = db.session.query(oktell_users).filter_by(ID=user_id).first()
     records = Schedule.query.all()
@@ -66,6 +69,11 @@ def user_page(user_id):
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M")
     test_time = (datetime.now() + timedelta(hours=1)).strftime("%Y-%m-%d %H:%M")
     record = Schedule(user_id=user_id, start=current_time, end=test_time, status=1)
+    '''
+    Status:
+    1 - newly added
+    2 - deactivated
+    '''
     db.session.add(record)
     db.session.commit()
     return "<p>Works</p>"
