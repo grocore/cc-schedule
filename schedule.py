@@ -8,6 +8,7 @@ from flask import Flask, render_template, redirect, request
 from flask.helpers import url_for
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
+from random import randint
 
 
 database_uri = (
@@ -46,20 +47,20 @@ def homepage():
 @app.route("/list/<user_id>", methods=['GET', 'POST'])
 def list(user_id):
     if request.method == 'POST':
-        record_id = request.values['record_id']
-        record = Schedule.query.get(record_id)
-        record.status = 3
-        print(request.date)
-        print(request.get_data())
-        db.session.commit()
+        if request.form['action'] == 'Отменить':
+            record_id = request.form.get('record_id')
+            record = Schedule.query.get(record_id)
+            record.status = 3
+            print(request.form.get('action'))
+            print(request.form.get('record_id'))
+            print(type(record_id))
+            db.session.commit()
+        elif request.form['action'] == 'Добавить':
+            print(type(request.form.get('Date')))
     user = db.session.query(oktell_users).filter_by(ID=user_id).first()
-    records = Schedule.query.all()
+    records = Schedule.query.order_by(Schedule.start.desc()).all()
     return render_template('schedule2.html', records=records, user_name=user.Name)
 
-@app.route("/deactivate/<record_id>")
-def deactivate(record_id):
-    
-    return redirect(url_for('list'))
 
 @app.route("/schedule/<user_id>", methods=['GET'])
 def user_page(user_id):

@@ -6,13 +6,22 @@
       <table class="table table-bordered table-hover">
         <thead class="table-dark">
           <tr>
-            <th scope="col">Имя оператора</th>
+            <th scope="col">Дата</th>
             <th scope="col">Начало смены</th>
             <th scope="col">Конец смены</th>
             <th scope="col">Действия</th>
           </tr>
         </thead>
         <tbody>
+
+          <form method="POST">
+          <tr>
+            <td><input type="date" class="form-control form-control-sm" name="Date" placeholder="Date"></td>
+            <td><input type="time" class="form-control form-control-sm" placeholder="Start"></td>
+            <td><input type="time" class="form-control form-control-sm" placeholder="End"></td>
+            <td><input type="submit" name="action" value="Добавить" style="background-color: #b6e668;"></td>
+          </tr>
+        </form>
           {% for record in records %}
           
             {% if record.status == 1 %}
@@ -20,19 +29,20 @@
             {% elif record.status == 2 %}
               <tr class="table-success">
             {% elif record.status == 3 %}
-              <tr class="table-secondary">
+              <tr class="table-danger">
             {% elif record.status == 4 %}
-              <tr class="table-secondary">
+              <tr class="table-danger">
             {% endif %}
 
-              <th scope="row">{{ user_name }}</th>
-              <td>{{ record.start }}</td>
-              <td>{{ record.end }}</td>
+              <th scope="row">{{ record.start.strftime('%d.%m.%Y') }}</th>
+              <td>{{ record.start.strftime('%H:%M') }}</td>
+              <td>{{ record.end.strftime('%H:%M') }}</td>
               <td>
                 <form method="POST">
                   <input type="hidden" name="record_id" value='{{ record.id }}'>
-                  <input type="submit" name="deactivate" value="Отменить" >
-                </form>               
+                  <input type="submit" name="action" value="Отменить">
+                </form>
+                            
               </td>
             </tr>
           {% endfor %}
