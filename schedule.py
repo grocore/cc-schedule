@@ -4,6 +4,7 @@ SERVER = 'localhost'
 DATABASE = 'oktell_settings'
 DRIVER = 'ODBC+DRIVER+17+for+SQL+Server'
 
+import re
 from flask import Flask, render_template, redirect, request
 from flask.helpers import url_for
 from flask_sqlalchemy import SQLAlchemy
@@ -46,8 +47,12 @@ def homepage():
 
 @app.route("/list/<user_id>", methods=['GET', 'POST'])
 def list(user_id):
+    print(request.method)
+    if user_id == 'test':
+        user_id = '15a05eb8-2cd9-4af6-bd93-6960bf50e5ae'
     if request.method == 'POST':
         if request.form['action'] == 'Отменить':
+            print('1')
             record_id = request.form.get('record_id')
             record = Schedule.query.get(record_id)
             record.status = 3
@@ -56,7 +61,18 @@ def list(user_id):
             print(type(record_id))
             db.session.commit()
         elif request.form['action'] == 'Добавить':
-            print(type(request.form.get('Date')))
+            print('2')
+            start = datetime.strptime(' '.join([request.form.get('Date'), request.form.get('Start')]), '%Y-%m-%d %H:%M')
+            end = datetime.strptime(' '.join([request.form.get('Date'), request.form.get('End')]), '%Y-%m-%d %H:%M')
+            record = Schedule(user_id=user_id, start=start, end=end, status=1)
+            db.session.add(record)
+            db.session.commit()
+            #end = datetime.strptime(request.form.get('End'), '%H:%M')
+            #print(type(start))
+            #shift_start = datetime.combine(date, start)
+            #print(shift_start)
+            #print(start, end, date)
+            print(start)
     user = db.session.query(oktell_users).filter_by(ID=user_id).first()
     records = Schedule.query.order_by(Schedule.start.desc()).all()
     return render_template('schedule2.html', records=records, user_name=user.Name)
