@@ -76,6 +76,11 @@ def cancel():
     return redirect(url_for('list', user_id=user_id))
 
 
+@app.route("/admin/<user_id>", methods=['GET'])
+def admin():
+    users = db.session.query(oktell_users).all()
+
+
 @app.route("/generate", methods=['GET'])
 def generate():
     user_id = '15a05eb8-2cd9-4af6-bd93-6960bf50e5ae'

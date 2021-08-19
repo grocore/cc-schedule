@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container block-right">
+  <div class="row">
+    <div class="col-12">
+      <table class="table table-bordered table-hover">
+        <thead class="table-dark">
+          <tr>
+            <th scope="col">Дата</th>
+            <th scope="col">Начало смены</th>
+            <th scope="col">Конец смены</th>
+            <th scope="col">Действия</th>
+          </tr>
+        </thead>
+        <tbody>
+          <form method="POST" action="{{ url_for('add') }}">
+          <tr>
+            <td><input type="date" min="{{ today }}" class="form-control form-control-sm" name="Date" placeholder="Date"></td>
+            <td><input type="time" class="form-control form-control-sm" name="Start" placeholder="Start"></td>
+            <td><input type="time" class="form-control form-control-sm" name="End" placeholder="End"></td>
+            <td><input type="submit" name="action" value="Добавить" style="background-color: #b6e668;"></td>
+          </tr>
+        </form>
+          {% for record in records %}
+            {% if record.status == 1 %}
+              <tr class="table-secondary">
+            {% elif record.status == 2 %}
+              <tr class="table-success">
+            {% elif record.status == 3 or record.status == 4 %}
+              <tr class="table-danger">
+            {% endif %}
+              <th scope="row">{{ record.start.strftime('%d.%m.%Y') }}</th>
+              <td>{{ record.start.strftime('%H:%M') }}</td>
+              <td>{{ record.end.strftime('%H:%M') }}</td>
+              <td>
+                <form method="POST" action="{{ url_for('cancel') }}">
+                  <input type="hidden" name="record_id" value='{{ record.id }}'>
+                  {% if record.status == 3 or record.status == 4 %}
+                  <input type="submit" name="action" disabled value="Отменить">
+                  {% else %}
+                  <input type="submit" name="action" value="Отменить">
+                  {% endif %}
+                </form>          
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock content %}

@@ -1,13 +1,21 @@
 .container {
-    padding: 2rem 0rem;
+    padding: 1rem;
   }
+  
+.block-left {
+  position:fixed;
+  left:0;
+  top:0;
+  width:30%;
+  height:100%;
+  overflow:auto;
+}
 
-  h4 {
-    margin: 2rem 0rem 1rem;
-  }
-
-  .table-image {
-    td, th {
-      vertical-align: middle;
-    }
-  }
+.block-right {
+  position:fixed;
+  right:0;
+  top:0;
+  width:70%;
+  height:100%;
+  overflow:auto;
+}
