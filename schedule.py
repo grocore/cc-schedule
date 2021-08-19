@@ -49,13 +49,15 @@ def list(user_id):
     today = date.today().strftime('%Y-%m-%d')
     #user = db.session.query(oktell_users).filter_by(ID=user_id).first()
     records = Schedule.query.order_by(Schedule.start.desc()).all()
-    return render_template('schedule2.html', records=records, today=today)
+    return render_template('schedule_operator.html', records=records, today=today)
 
 
 @app.route("/add/", methods=['POST'])
 def add():
     user_id = session['operator']
-    if request.form.get('Date') and request.form.get('Start') and request.form.get('End'):
+    if request.form.get('Date') and request.form.get('Start') and request.form.get('End') and (request.form.get('Start') < request.form.get('End')):
+        print(request.form.get('Start'))
+        print(type(request.form.get('Start')))
         start = datetime.strptime(' '.join([request.form.get('Date'), request.form.get('Start')]), '%Y-%m-%d %H:%M')
         end = datetime.strptime(' '.join([request.form.get('Date'), request.form.get('End')]), '%Y-%m-%d %H:%M')
         record = Schedule(user_id=user_id, start=start, end=end, status=1)
@@ -73,6 +75,7 @@ def cancel():
     db.session.commit()
     return redirect(url_for('list', user_id=user_id))
 
+
 @app.route("/generate", methods=['GET'])
 def generate():
     user_id = '15a05eb8-2cd9-4af6-bd93-6960bf50e5ae'
@@ -84,6 +87,7 @@ def generate():
     db.session.add(record)
     db.session.commit()
     return "<p>OK</p>"
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

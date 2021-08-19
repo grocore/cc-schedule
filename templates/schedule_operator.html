@@ -22,7 +22,6 @@
           </tr>
         </form>
           {% for record in records %}
-          
             {% if record.status == 1 %}
               <tr class="table-secondary">
             {% elif record.status == 2 %}
@@ -30,20 +29,17 @@
             {% elif record.status == 3 or record.status == 4 %}
               <tr class="table-danger">
             {% endif %}
-
               <th scope="row">{{ record.start.strftime('%d.%m.%Y') }}</th>
               <td>{{ record.start.strftime('%H:%M') }}</td>
               <td>{{ record.end.strftime('%H:%M') }}</td>
               <td>
                 <form method="POST" action="{{ url_for('cancel') }}">
                   <input type="hidden" name="record_id" value='{{ record.id }}'>
-
                   {% if record.status == 3 or record.status == 4 %}
                   <input type="submit" name="action" disabled value="Отменить">
                   {% else %}
                   <input type="submit" name="action" value="Отменить">
                   {% endif %}
-
                 </form>          
               </td>
             </tr>
