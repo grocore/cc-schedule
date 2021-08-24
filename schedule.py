@@ -4,6 +4,7 @@ SERVER = 'localhost'
 DATABASE = 'oktell_settings'
 DRIVER = 'ODBC+DRIVER+17+for+SQL+Server'
 
+import operator
 from flask import Flask, render_template, redirect, request, session
 from flask.helpers import url_for
 from flask_sqlalchemy import SQLAlchemy
@@ -40,15 +41,15 @@ class Schedule(db.Model):
 
 @app.route("/")
 def homepage():
-    return redirect(url_for('list', user_id='15a05eb8-2cd9-4af6-bd93-6960bf50e5ae'))
+    return redirect(url_for('schedule', user_id='15a05eb8-2cd9-4af6-bd93-6960bf50e5ae'))
 
 
-@app.route("/list/<user_id>", methods=['GET'])
-def list(user_id):
+@app.route("/schedule/<user_id>", methods=['GET'])
+def schedule(user_id):
     session['operator'] = user_id
     today = date.today().strftime('%Y-%m-%d')
     #user = db.session.query(oktell_users).filter_by(ID=user_id).first()
-    records = Schedule.query.order_by(Schedule.start.desc()).all()
+    records = Schedule.query.filter_by(user_id=user_id).order_by(Schedule.start.desc()).all() # .order_by(Schedule.start.desc())
     return render_template('schedule_operator.html', records=records, today=today)
 
 
@@ -56,14 +57,12 @@ def list(user_id):
 def add():
     user_id = session['operator']
     if request.form.get('Date') and request.form.get('Start') and request.form.get('End') and (request.form.get('Start') < request.form.get('End')):
-        print(request.form.get('Start'))
-        print(type(request.form.get('Start')))
         start = datetime.strptime(' '.join([request.form.get('Date'), request.form.get('Start')]), '%Y-%m-%d %H:%M')
         end = datetime.strptime(' '.join([request.form.get('Date'), request.form.get('End')]), '%Y-%m-%d %H:%M')
         record = Schedule(user_id=user_id, start=start, end=end, status=1)
         db.session.add(record)
         db.session.commit()
-    return redirect(url_for('list', user_id=user_id))
+    return redirect(url_for('schedule', user_id=user_id))
 
 
 @app.route("/cancel/", methods=['POST'])
@@ -73,13 +72,41 @@ def cancel():
     record = Schedule.query.get(record_id)
     record.status = 3
     db.session.commit()
-    return redirect(url_for('list', user_id=user_id))
+    return redirect(url_for('schedule', user_id=user_id))
 
+@app.route("/sv_cancel/", methods=['POST'])
+def sv_cancel():
+    user_id = session['operator']
+    record_id = request.form.get('record_id')
+    record = Schedule.query.get(record_id)
+    record.status = 4
+    db.session.commit()
+    return redirect(url_for('admin', user_id=user_id))
 
-@app.route("/admin/<user_id>", methods=['GET'])
-def admin():
-    users = db.session.query(oktell_users).all()
+@app.route("/sv_aprove/", methods=['POST'])
+def sv_aprove():
+    user_id = session['operator']
+    record_id = request.form.get('record_id')
+    record = Schedule.query.get(record_id)
+    record.status = 2
+    db.session.commit()
+    return redirect(url_for('admin', user_id=user_id))
 
+@app.route("/admin/<user_id>", methods=['GET', 'POST'])
+def admin(user_id):
+    if not session['sv_id']:
+        session['sv_id'] = user_id
+    allusers = db.session.query(oktell_users).all()
+    if request.method == 'POST' and request.form.get('operator'):
+        name = request.form.get('operator')
+        user = db.session.query(oktell_users).filter_by(Name=name).first()
+        session['operator'] = user.ID
+        return redirect(url_for('admin', user_id=user.ID))
+    records = Schedule.query.filter_by(user_id=user_id).order_by(Schedule.start.desc()).all()
+
+    print(user_id)
+    return render_template('test.html', users=allusers, records=records)
+    
 
 @app.route("/generate", methods=['GET'])
 def generate():
