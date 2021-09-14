@@ -1,21 +1,34 @@
-from sqlalchemy.engine import create_engine
-from sqlalchemy.sql.schema import MetaData, Table
+USERNAME = 'sa'
+PASSWORD = 'passworD0'
+SERVER = 'localhost'
+DATABASE = 'oktell_settings'
+DRIVER = 'ODBC+DRIVER+17+for+SQL+Server'
+
+import operator
 from flask import Flask, render_template, redirect, request, session
 from flask.helpers import url_for
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, date, timedelta
-import settings
 
+
+
+database_uri = (
+    'mssql+pyodbc://{}:{}@{}/{}?driver={}'.format(
+        USERNAME, PASSWORD, SERVER, DATABASE, DRIVER
+        )
+    )
 
 app = Flask(__name__)
-app.config.from_object(settings.ProductionConfig())
 
-engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], convert_unicode=True)
-metadata = MetaData(bind=engine)
+app.config['SECRET_KEY'] = "zP0B8YTzRy9vcGMqVEKFFMqoT4kzn7IU"
+app.config['SQLALCHEMY_DATABASE_URI'] = database_uri
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+db.create_all()
 
-oktell_users = Table(app.config['SOURCE_TABLE'], metadata, autoload=True, autoload_with=engine)
+oktell_users = db.Table('A_Users', db.metadata, autoload=True, autoload_with=db.engine)
+
 
 class Schedule(db.Model):
     __tablename__ = 'A_Schedule'
@@ -81,7 +94,7 @@ def sv_aprove():
 
 @app.route("/admin/<user_id>", methods=['GET', 'POST'])
 def admin(user_id):
-    if not session.get('sv_id'):
+    if not session['sv_id']:
         session['sv_id'] = user_id
     allusers = db.session.query(oktell_users).all()
     if request.method == 'POST' and request.form.get('operator'):

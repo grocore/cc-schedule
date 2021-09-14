@@ -133,3 +133,6 @@ Pipfile.lock
 
 # Visual Studo Code
 .vscode
+
+# Config files
+settings.py
