@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>jQuery UI Datepicker - Localize calendar</title>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
+  <link rel="stylesheet" href="https://jqueryui.com/resources/demos/style.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+  <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
+  <script src="https://raw.githubusercontent.com/jquery/jquery-ui/main/ui/i18n/datepicker-ar.js"></script>
+  <script src="https://raw.githubusercontent.com/jquery/jquery-ui/main/ui/i18n/datepicker-fr.js"></script>
+  <script src="https://raw.githubusercontent.com/jquery/jquery-ui/main/ui/i18n/datepicker-he.js"></script>
+  <script src="https://raw.githubusercontent.com/jquery/jquery-ui/main/ui/i18n/datepicker-zh-TW.js"></script>
+  <script>
+  $( function() {
+    $( "#datepicker" ).datepicker( {
+    closeText: "Закрыть",
+	prevText: "&#x3C;Пред",
+	nextText: "След&#x3E;",
+	currentText: "Сегодня",
+	monthNames: [ "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+	"Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь" ],
+	monthNamesShort: [ "Янв", "Фев", "Мар", "Апр", "Май", "Июн",
+	"Июл", "Авг", "Сен", "Окт", "Ноя", "Дек" ],
+	dayNames: [ "воскресенье", "понедельник", "вторник", "среда", "четверг", "пятница", "суббота" ],
+	dayNamesShort: [ "вск", "пнд", "втр", "срд", "чтв", "птн", "сбт" ],
+	dayNamesMin: [ "Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб" ],
+	weekHeader: "Нед",
+	dateFormat: "dd.mm.yy",
+	firstDay: 1,
+	isRTL: false,
+	showMonthAfterYear: false,
+	yearSuffix: "" 
+    });
+    
+  } );
+  </script>
+</head>
+<body>
+ 
+<p>Date: <input type="text" id="datepicker">&#xA0;
+  <select id="locale">
+    <option value="ar">Arabic (&#x202B;(&#x627;&#x644;&#x639;&#x631;&#x628;&#x64A;&#x629;</option>
+    <option value="zh-TW">Chinese Traditional (&#x7E41;&#x9AD4;&#x4E2D;&#x6587;)</option>
+    <option value>English</option>
+    <option value="fr" selected="selected">French (Fran&#xE7;ais)</option>
+    <option value="he">Hebrew (&#x202B;(&#x5E2;&#x5D1;&#x5E8;&#x5D9;&#x5EA;</option>
+  </select></p>
+ 
+ 
+</body>
+</html>

@@ -1,27 +1,44 @@
-{% extends 'base.html' %}
+{% extends "layout.html" %}
 {% block content %}
-  <table class="table table-hover">
-    <thead>
-      <tr bgcolor="#faa83b;">
-        <th scope="col">Username</th>
-        <th scope="col">Start</th>
-        <th scope="col">End </th>
-      </tr>
+<table class="table table-bordered table-hover table-sm">
+    <thead class="thead-green">
+    <tr>
+        <th scope="col">Дата</th>
+        <th scope="col">Начало смены</th>
+        <th scope="col">Конец смены</th>
+        <th scope="col">Статус</th>
+        <th scope="col">Действия</th>
+    </tr>
     </thead>
-    <tbody class="table">
-      
-      {% for record in records %}
-      <tr>
-        <th scope="row"><a href="#"> {{ user_name }} </th>
-        <td>{{ record.start }}</td>
-        <td>{{ record.end }}</td>
-      </tr>
-      
-      {% endfor %}
-
+    <tbody>
+    {% for shift in shifts %}
+        <tr class="table">
+        <th scope="row">{{ shift.start.strftime('%d.%m.%Y') }}</th>
+        <td>{{ shift.start.strftime('%H:%M') }}</td>
+        <td>{{ shift.end.strftime('%H:%M') }}</td>
+        <td>
+            {% if shift.status == 1 %}
+            <p class="h6">Ожидает одобрения</p>
+            {% elif shift.status == 2 %}
+            <p class="h6">Одобрена супервайзером</p>
+            {% elif shift.status == 3 %} 
+            <p class="h6">Отменена оператором</p>
+            {% elif shift.status == 4 %}
+            <p>Отменена супрвайзером</p>
+            <p class="h6">Отменена супервайзером</p>
+            {% endif %}
+        </td>
+        <td>
+            <form method="POST" action="{{ url_for('cancel_shift', shift_id=shift.id) }}">
+            {% if shift.status == 3 or shift.status == 4 %}
+            <input class="btn btn-sm btn-outline-danger" type="submit" disabled value="Отменить">
+            {% else %}
+            <input class="btn btn-sm btn-danger" type="submit" value="Отменить">
+            {% endif %}
+            </form>          
+        </td>
+        </tr>
+    {% endfor %}
     </tbody>
-  </table>
-  <a class="btn btn-outline-success" href="#">Add</a>
-
+</table>
 {% endblock content %}
-

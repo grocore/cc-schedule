@@ -4,13 +4,12 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-sqlalchemy = "==1.4.20"
-pyodbc = "==4.0.31"
-flask-sqlalchemy = "==2.5.1"
-python-dotenv = "*"
+flask-sqlalchemy = "*"
+flask-wtf = "*"
+flask-login = "*"
+pyodbc = "*"
 
 [dev-packages]
-flake8 = "*"
 
 [requires]
 python_version = "3.8"

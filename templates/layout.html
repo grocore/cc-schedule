@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ru_RU">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/bootstrap.min.css') }}">
+    
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
+    
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='jquery/jquery-ui.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='jquery/style.css') }}">
+    <script src="{{ url_for('static', filename='jquery/jquery-1.12.4.js') }}"></script>
+    <script src="{{ url_for('static', filename='jquery/jquery-ui.js') }}"></script>
+    <script src="{{ url_for('static', filename='jquery/datepicker-ru.js') }}"></script>
+    <script>
+      $( function() {
+        $( "#datepicker" ).datepicker( {
+          closeText: "Закрыть",
+          prevText: "&#x3C;Пред",
+          nextText: "След&#x3E;",
+          currentText: "Сегодня",
+          monthNames: [ "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+          "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь" ],
+          monthNamesShort: [ "Янв", "Фев", "Мар", "Апр", "Май", "Июн",
+          "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек" ],
+          dayNames: [ "воскресенье", "понедельник", "вторник", "среда", "четверг", "пятница", "суббота" ],
+          dayNamesShort: [ "вск", "пнд", "втр", "срд", "чтв", "птн", "сбт" ],
+          dayNamesMin: [ "Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб" ],
+          weekHeader: "Нед",
+          dateFormat: "dd.mm.yy",
+          firstDay: 1,
+          isRTL: false,
+          showMonthAfterYear: false,
+          yearSuffix: "",
+          minDate: -0,
+          maxDate: '+1M +05D',
+        }); 
+      } );
+    </script>
+    
+
+    {% if title %}
+        <title>Ассистент КЦ - {{ title }}</title>
+    {% else %}
+        <title>Ассистент КЦ</title>
+    {% endif %}
+</head>
+<body>
+    <header class="site-header">
+      <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
+        <div class="container">
+          {% if current_user.is_authenticated %}
+          <a class="navbar-brand mr-4" href="/">Ассистент КЦ - {{ current_user.name }}</a>
+          {% else %}
+          <a class="navbar-brand mr-4" href="/">Ассистент КЦ</a>
+          {% endif %}        
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarToggle">
+            <div class="navbar-nav mr-auto">
+              <a class="nav-item nav-link" href="{{ url_for('home') }}">Домой</a>
+            </div>
+            <div class="dropdown">
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Dropdown button
+              </button>
+              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <a class="dropdown-item" href="#">Action</a>
+                <a class="dropdown-item" href="#">Another action</a>
+                <a class="dropdown-item" href="#">Something else here</a>
+              </div>
+            </div>
+            <!-- Navbar Right Side -->
+            <div class="navbar-nav">
+              {% if current_user.is_authenticated %}
+                <a class="nav-item nav-link" href="{{ url_for('new_shift') }}">Добавить смену</a>
+                <a class="nav-item nav-link" href="{{ url_for('logout') }}">Выйти</a>
+              {% else %}
+                <a class="nav-item nav-link" href="{{ url_for('login') }}">Войти</a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+    <main role="main" class="container">
+      <div class="row">
+        <div class="col-md-12">
+          {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                  {{ message }}
+                </div>
+              {% endfor %}
+            {% endif %}
+          {% endwith %}
+          {% block content %}{% endblock %}
+        </div>
+      </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='bootstrap/bootstrap.min.js') }}"></script>
+
+  </body>
+</html>

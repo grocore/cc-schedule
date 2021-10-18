@@ -1,112 +1,150 @@
-from sqlalchemy.engine import create_engine
-from sqlalchemy.sql.schema import MetaData, Table
-from flask import Flask, render_template, redirect, request, session
-from flask.helpers import url_for
+from flask import Flask, render_template, redirect, url_for, flash, request
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin, login_user, current_user, logout_user, login_required
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, SelectField, TextField
+from wtforms.fields.html5 import DateField, TimeField, SearchField
+from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
+from hashlib import md5
 from datetime import datetime, date, timedelta
-import settings
+from settings import DevelopmentConfig
 
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
-app.config.from_object(settings.ProductionConfig())
-
-engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], convert_unicode=True)
-metadata = MetaData(bind=engine)
-
+app.config.from_object(DevelopmentConfig())
 db = SQLAlchemy(app)
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
+login_manager.login_message_category = 'info'
+login_manager.login_message = u"Для доступа к системе необходима авторизация."
 
-oktell_users = Table(app.config['SOURCE_TABLE'], metadata, autoload=True, autoload_with=engine)
+class User(db.Model, UserMixin):
+    __tablename__ = app.config['SOURCE_TABLE']
+    id = db.Column('ID', db.String(40), primary_key=True)
+    name = db.Column('Name', db.String(120))
+    login = db.Column('Login', db.String(120))
+    password = db.Column('Password', db.String(60))
+    parentgroupid = db.Column('ParentGroupID', db.String(60))
 
-class Schedule(db.Model):
-    __tablename__ = 'A_Schedule'
+    def __repr__(self):
+        return f"User('{self.id}', '{self.name}', '{self.login}')"
+
+class Shift(db.Model):
+    __tablename__ = 'A_Shifts'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.String(36), nullable=False)
     start = db.Column(db.DateTime, nullable=False)
     end = db.Column(db.DateTime, nullable=False)
     status = db.Column(db.Integer)
 
+    def __repr__(self):
+        return f"Shift('{self.user_id}', '{self.start}', '{self.end}')"
 
-@app.route("/")
-def homepage():
-    return redirect(url_for('schedule', user_id='15a05eb8-2cd9-4af6-bd93-6960bf50e5ae'))
-
-
-@app.route("/schedule/<user_id>", methods=['GET'])
-def schedule(user_id):
-    session['operator'] = user_id
-    today = date.today().strftime('%Y-%m-%d')
-    #user = db.session.query(oktell_users).filter_by(ID=user_id).first()
-    records = Schedule.query.filter_by(user_id=user_id).order_by(Schedule.start.desc()).all() # .order_by(Schedule.start.desc())
-    return render_template('schedule_operator.html', records=records, today=today)
-
-
-@app.route("/add/", methods=['POST'])
-def add():
-    user_id = session['operator']
-    if request.form.get('Date') and request.form.get('Start') and request.form.get('End') and (request.form.get('Start') < request.form.get('End')):
-        start = datetime.strptime(' '.join([request.form.get('Date'), request.form.get('Start')]), '%Y-%m-%d %H:%M')
-        end = datetime.strptime(' '.join([request.form.get('Date'), request.form.get('End')]), '%Y-%m-%d %H:%M')
-        record = Schedule(user_id=user_id, start=start, end=end, status=1)
-        db.session.add(record)
-        db.session.commit()
-    return redirect(url_for('schedule', user_id=user_id))
-
-
-@app.route("/cancel/", methods=['POST'])
-def cancel():
-    user_id = session['operator']
-    record_id = request.form.get('record_id')
-    record = Schedule.query.get(record_id)
-    record.status = 3
-    db.session.commit()
-    return redirect(url_for('schedule', user_id=user_id))
-
-@app.route("/sv_cancel/", methods=['POST'])
-def sv_cancel():
-    user_id = session['operator']
-    record_id = request.form.get('record_id')
-    record = Schedule.query.get(record_id)
-    record.status = 4
-    db.session.commit()
-    return redirect(url_for('admin', user_id=user_id))
-
-@app.route("/sv_aprove/", methods=['POST'])
-def sv_aprove():
-    user_id = session['operator']
-    record_id = request.form.get('record_id')
-    record = Schedule.query.get(record_id)
-    record.status = 2
-    db.session.commit()
-    return redirect(url_for('admin', user_id=user_id))
-
-@app.route("/admin/<user_id>", methods=['GET', 'POST'])
-def admin(user_id):
-    if not session.get('sv_id'):
-        session['sv_id'] = user_id
-    allusers = db.session.query(oktell_users).all()
-    if request.method == 'POST' and request.form.get('operator'):
-        name = request.form.get('operator')
-        user = db.session.query(oktell_users).filter_by(Name=name).first()
-        session['operator'] = user.ID
-        return redirect(url_for('admin', user_id=user.ID))
-    records = Schedule.query.filter_by(user_id=user_id).order_by(Schedule.start.desc()).all()
-
-    print(user_id)
-    return render_template('test.html', users=allusers, records=records)
-    
-
-@app.route("/generate", methods=['GET'])
-def generate():
-    user_id = '15a05eb8-2cd9-4af6-bd93-6960bf50e5ae'
-    user = db.session.query(oktell_users).filter_by(ID=user_id).first()
-    user_name = user.Name
+def generate_shift():
+    user_id = current_user.id
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M")
     test_time = (datetime.now() + timedelta(hours=1)).strftime("%Y-%m-%d %H:%M")
-    record = Schedule(user_id=user_id, start=current_time, end=test_time, status=1)
-    db.session.add(record)
+    shift = Shift(user_id=user_id, start=current_time, end=test_time, status=1)
+    db.session.add(shift)
     db.session.commit()
-    return "<p>OK</p>"
 
+def check_pwd(hash, password):
+    return md5(password.encode('utf-8')).hexdigest().upper() == hash.upper()
+
+class LoginForm(FlaskForm):
+    name = StringField('Имя пользователя',
+                        validators=[DataRequired()])
+    password = PasswordField('Пароль', validators=[DataRequired()])
+    remember = BooleanField('Запомнить меня')
+    submit = SubmitField('Войти')
+
+class ShiftForm(FlaskForm):
+    date = TextField('Дата', id="datepicker")
+    start_time = TimeField('Время начала смены')
+    end_time = TimeField('Время окончания смены')
+    submit = SubmitField('Добавить')stor
+
+    def validate_end_time(self, field):
+        if field.data <= self.start_time.data:
+            raise ValidationError('Время окончания смены должно быть после времени начала')
+ 
+class SelectOperatorForm(FlaskForm):
+    #department = SearchField('Отдел')
+    language = SelectField(u'Programming Language', choices=[('cpp', 'C++'), ('py', 'Python'), ('text', 'Plain Text')])
+    submit = SubmitField('Найти')
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(str(user_id))
+
+@app.route("/")
+@app.route("/home")
+@login_required
+def home():
+    shifts = Shift.query.filter_by(user_id=current_user.id).order_by(Shift.start.desc()).all()
+    return render_template('schedule.html', shifts=shifts)
+
+@app.route("/login", methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(login=form.name.data).first()
+        if user and check_pwd(user.password, form.password.data):
+            login_user(user, remember=form.remember.data)
+            next_page = request.args.get('next')
+            flash('С возвращением, {}'.format(user.name), 'info')
+            return redirect(next_page) if next_page else redirect(url_for('home'))
+        else:
+            flash('Неверное имя пользователя или пароль.', 'danger')
+    return render_template('login.html', title='Вход', form=form)
+
+@app.route("/logout")
+def logout():
+    logout_user()
+    return redirect(url_for('home'))
+
+@app.route("/shift/new", methods=['GET', 'POST'])
+@login_required
+def new_shift():
+    form = ShiftForm()
+    if form.validate_on_submit():
+        print(form.date.data, type(form.date.data))
+        date_obj = datetime.strptime(form.date.data, "%m/%d/%Y")
+        start = datetime.combine(date_obj, form.start_time.data)
+        end = datetime.combine(date_obj, form.end_time.data)
+        shift = Shift(user_id=current_user.id, start=start, end=end, status=1)
+        db.session.add(shift)
+        db.session.commit()
+        flash('Ваша смена была успешно добавлена.', 'success')
+        return redirect(url_for('home'))
+    today = date.today().strftime('%Y-%m-%d')
+    return render_template('create_shift.html', today=today, title='Добавление смены', form=form, legend='Добавление новой смены')
+
+@app.route("/shift/<int:shift_id>/delete", methods=['POST'])
+@login_required
+def cancel_shift(shift_id):
+    shift = Shift.query.get_or_404(shift_id)
+    shift.status = 3
+    db.session.commit()
+    flash('Смена была отменена.', 'success')
+    return redirect(url_for('home'))
+
+@app.route("/sv", methods=['GET', 'POST'])
+@login_required
+def sv():
+    form = SelectOperatorForm()
+    if form.validate_on_submit():
+        print(form.language.data)
+        print(type(form.language.data))
+    return render_template('schedule_sv.html', form=form)
+
+@app.route("/generate", methods=['GET', 'POST'])
+def generate():
+    generate_shift()
+    return 'OK'
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True)
