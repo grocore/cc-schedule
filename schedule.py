@@ -63,11 +63,18 @@ class ShiftForm(FlaskForm):
     date = TextField('Дата', id="datepicker")
     start_time = TimeField('Время начала смены')
     end_time = TimeField('Время окончания смены')
-    submit = SubmitField('Добавить')stor
+    submit = SubmitField('Добавить') 
+
+    def validate_date(self, field):
+        try:
+            datetime.strptime(field.data, "%d.%m.%Y")
+        except:
+            raise ValidationError('Дата не соответствует формату "ДД.ММ.ГГГГ"')
+
 
     def validate_end_time(self, field):
         if field.data <= self.start_time.data:
-            raise ValidationError('Время окончания смены должно быть после времени начала')
+            raise ValidationError('Время начала смены должно предшествовать времени окончания')
  
 class SelectOperatorForm(FlaskForm):
     #department = SearchField('Отдел')
@@ -112,7 +119,7 @@ def new_shift():
     form = ShiftForm()
     if form.validate_on_submit():
         print(form.date.data, type(form.date.data))
-        date_obj = datetime.strptime(form.date.data, "%m/%d/%Y")
+        date_obj = datetime.strptime(form.date.data, "%d.%m.%Y")
         start = datetime.combine(date_obj, form.start_time.data)
         end = datetime.combine(date_obj, form.end_time.data)
         shift = Shift(user_id=current_user.id, start=start, end=end, status=1)
