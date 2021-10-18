@@ -60,9 +60,9 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Войти')
 
 class ShiftForm(FlaskForm):
-    date = TextField('Дата', id="datepicker")
-    start_time = TimeField('Время начала смены')
-    end_time = TimeField('Время окончания смены')
+    date = TextField('Дата', id="datepicker", render_kw={'readonly': True})
+    start_time = TextField('Время начала смены', render_kw={'readonly': True})
+    end_time = TextField('Время окончания смены', render_kw={'readonly': True})
     submit = SubmitField('Добавить') 
 
     def validate_date(self, field):
@@ -120,8 +120,10 @@ def new_shift():
     if form.validate_on_submit():
         print(form.date.data, type(form.date.data))
         date_obj = datetime.strptime(form.date.data, "%d.%m.%Y")
-        start = datetime.combine(date_obj, form.start_time.data)
-        end = datetime.combine(date_obj, form.end_time.data)
+        start_obj = datetime.strptime(form.start_time.data, '%H:%M').time()
+        end_obj = datetime.strptime(form.end_time.data, '%H:%M').time()
+        start = datetime.combine(date_obj, start_obj)
+        end = datetime.combine(date_obj, end_obj)
         shift = Shift(user_id=current_user.id, start=start, end=end, status=1)
         db.session.add(shift)
         db.session.commit()
