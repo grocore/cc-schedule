@@ -60,22 +60,32 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Войти')
 
 class ShiftForm(FlaskForm):
-    date = TextField('Дата', id="datepicker", render_kw={'readonly': True})
+    date = TextField('Дата', render_kw={'readonly': True})
     start_time = TextField('Время начала смены', render_kw={'readonly': True})
     end_time = TextField('Время окончания смены', render_kw={'readonly': True})
     submit = SubmitField('Добавить') 
 
     def validate_date(self, field):
-        try:
-            datetime.strptime(field.data, "%d.%m.%Y")
-        except:
-            raise ValidationError('Дата не соответствует формату "ДД.ММ.ГГГГ"')
+        if field.data:
+            try:
+                datetime.strptime(field.data, "%d.%m.%Y")
+            except:
+                raise ValidationError('Дата не соответствует формату "ДД.ММ.ГГГГ"')
+        else:
+            raise ValidationError('Не выбрана дата')
+
+    def validate_start_time(self, field):
+        if not field.data:
+            raise ValidationError('Не выбрано время начала смены')
 
 
     def validate_end_time(self, field):
-        if field.data <= self.start_time.data:
-            raise ValidationError('Время начала смены должно предшествовать времени окончания')
- 
+        if field.data:
+            if field.data <= self.start_time.data:
+                raise ValidationError('Время начала смены должно предшествовать времени окончания')
+        else:
+            raise ValidationError('Не выбрано время окончания смены')
+
 class SelectOperatorForm(FlaskForm):
     #department = SearchField('Отдел')
     language = SelectField(u'Programming Language', choices=[('cpp', 'C++'), ('py', 'Python'), ('text', 'Plain Text')])
@@ -120,11 +130,21 @@ def new_shift():
     if form.validate_on_submit():
         print(form.date.data, type(form.date.data))
         date_obj = datetime.strptime(form.date.data, "%d.%m.%Y")
+
+        print(date_obj.date())
+
         start_obj = datetime.strptime(form.start_time.data, '%H:%M').time()
         end_obj = datetime.strptime(form.end_time.data, '%H:%M').time()
         start = datetime.combine(date_obj, start_obj)
         end = datetime.combine(date_obj, end_obj)
+
+        
         shift = Shift(user_id=current_user.id, start=start, end=end, status=1)
+        this_user_shifts = Shift.query.filter_by(user_id=current_user.id).all()
+        for a_shift in this_user_shifts:
+            print(a_shift.start)
+        #print(this_user_shifts)
+
         db.session.add(shift)
         db.session.commit()
         flash('Ваша смена была успешно добавлена.', 'success')

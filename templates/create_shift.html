@@ -1,13 +1,13 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="content-section  d-flex justify-content-center">
+<div class="border content-section  d-flex justify-content-center">
     <form method="POST" action="{{ url_for('new_shift') }}" autocomplete="off">
         {{ form.hidden_tag() }}
         <fieldset class="form-group">
             <div class="form-group">
                 {{ form.date.label(class="form-control-label") }}
                 {% if form.date.errors %}
-                    {{ form.date(class="form-control form-control-lg is-invalid") }}
+                    {{ form.date(class="form-control form-control-lg is-invalid datepicker") }}
                     <div class="invalid-feedback">
                         {% for error in form.date.errors %}
                             <span>{{ error }}</span>
