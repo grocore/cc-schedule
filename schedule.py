@@ -142,7 +142,10 @@ def new_shift():
         shift = Shift(user_id=current_user.id, start=start, end=end, status=1)
         this_user_shifts = Shift.query.filter_by(user_id=current_user.id).all()
         for a_shift in this_user_shifts:
-            print(a_shift.start)
+            #print(a_shift.start.date())
+            if (a_shift.status in [1,2]) and a_shift.start < end and start < a_shift.end: #проверка на пересечение с существующими сменами
+                flash('Смена не была добавлена, так как существует пересечение по времени с уже существующей сменой.', 'danger')
+                return redirect(url_for('home'))
         #print(this_user_shifts)
 
         db.session.add(shift)
