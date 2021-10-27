@@ -2,7 +2,7 @@
 {% block content %}
 <table class="table table-bordered table-hover table-sm">
     <thead class="thead-green">
-    <tr bgcolor="#e9ecef">
+    <tr bgcolor="#b0c4de">
         <th scope="col">Дата</th>
         <th scope="col">Начало смены</th>
         <th scope="col">Конец смены</th>
@@ -11,7 +11,7 @@
     </tr>
     </thead>
     <tbody>
-    {% for shift in shifts %}
+    {% for shift in shifts if shift.status in (1, 2) %}
         <tr class="table">
         <th scope="row">{{ shift.start.strftime('%d.%m.%Y') }}</th>
         <td>{{ shift.start.strftime('%H:%M') }}</td>
@@ -21,11 +21,15 @@
             <p class="h6">Ожидает одобрения</p>
             {% elif shift.status == 2 %}
             <p class="h6">Одобрена супервайзером</p>
+            
+            <!--
             {% elif shift.status == 3 %} 
             <p class="h6">Отменена оператором</p>
             {% elif shift.status == 4 %}
             <p>Отменена супрвайзером</p>
             <p class="h6">Отменена супервайзером</p>
+            -->
+
             {% endif %}
         </td>
         <td>
