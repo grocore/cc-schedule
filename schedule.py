@@ -26,6 +26,7 @@ class User(db.Model, UserMixin):
     login = db.Column('Login', db.String(120))
     password = db.Column('Password', db.String(60))
     parentgroupid = db.Column('ParentGroupID', db.String(60))
+    groupname = db.Column('GroupName', db.String(200))
 
     def __repr__(self):
         return f"User('{self.id}', '{self.name}', '{self.login}')"
@@ -88,7 +89,8 @@ class ShiftForm(FlaskForm):
 
 class SelectOperatorForm(FlaskForm):
     #department = SearchField('Отдел')
-    language = SelectField(u'Programming Language', choices=[('cpp', 'C++'), ('py', 'Python'), ('text', 'Plain Text')])
+    #language = SelectField(u'Programming Language', choices=[('cpp', 'C++'), ('py', 'Python'), ('text', 'Plain Text')])
+    autocomplete_input = StringField('autocomplete_input', validators=[DataRequired()])
     submit = SubmitField('Найти')
 
 @login_manager.user_loader
@@ -168,10 +170,10 @@ def cancel_shift(shift_id):
 @login_required
 def sv():
     form = SelectOperatorForm()
-    if form.validate_on_submit():
-        print(form.language.data)
-        print(type(form.language.data))
-    return render_template('schedule_sv.html', form=form)
+    users = User.query.filter_by(groupname='ИТ3').all()
+    print(users[0].name)
+    print(users)
+    return render_template('test.html', form=form, users=users)
 
 @app.route("/generate", methods=['GET', 'POST'])
 def generate():

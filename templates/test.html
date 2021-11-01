@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block content %}
+<header class="p-0 bg-light text-dark">
+    <div class="container">
+      <form action="" method="POST" autocomplete="off">
+      <div class="input-group">
+        <input class="form-control" list="operators" name="operator" id="exampleDataList" placeholder="Начните вводить часть имени оператора...">
+        <datalist id="operators" name="operators">
+          {% for user in users  %}
+          <option value="{{ user.name }}">
+          {% endfor %}
+        </datalist>
+        <button type="submit" class="btn btn-outline-secondary">Найти</button>
+      </div>
+      </form>
+    </div>
+  </header>
+{% endblock content %}
